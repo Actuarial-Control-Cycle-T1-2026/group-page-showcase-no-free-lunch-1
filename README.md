@@ -91,7 +91,7 @@ Our capital modelling process involves four key steps:
 | Business Interruption | Negative Binomial | Gamma |
 | Workers’ Compensation | Poisson | Lognormal |
 
-### Simulation Logic
+#### Simulation Logic
 
 In each iteration of the Monte Carlo simulation implemented, the annual claim count is simulated first from the frequency distributions fitted, followed by individual claim severities simulated using fitted severity distributions. Summing up the claim amounts allows us to obtain total annual loss.
 
