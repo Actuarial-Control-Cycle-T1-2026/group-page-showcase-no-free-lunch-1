@@ -21,3 +21,31 @@ This page is written in Markdown.
 More information on GitHub Pages can be found [here](https://pages.github.com/).
 
 ![](Actuarial.gif)
+
+
+
+1. EDA
+Gabriel
+
+2. Product Designs
+Tanvir
+
+3. Model Building
+Gilbert
+
+4. Capital Modelling
+Sean
+
+
+5. Risk Considerations
+Olivia
+
+
+
+
+
+
+
+
+
+
