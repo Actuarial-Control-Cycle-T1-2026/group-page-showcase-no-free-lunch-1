@@ -73,6 +73,8 @@ Covers repair or replacement costs for mechanical and electrical failures of min
 #### Workers’ Compensation
 Provides protection for work-related injuries and illnesses, including those arising from space-specific hazards such as radiation and low gravity. Benefits include income replacement, medical costs, and lump-sum compensation, subject to medical verification confirming the incident occurred at the workplace
 
+#### Business Interruption
+Covers loss of income and ongoing expenses resulting from operational disruptions, including equipment failure, energy issues, or environmental hazards. Claims are subject to a waiting period and risk-based deductibles, reflecting the high severity but low frequency of interruptions. Periodic policy reviews and environmental compliance checks are conducted annually or biannually to ensure adherence to operational protocols. 
 
 3. Model Building
 Gilbert
