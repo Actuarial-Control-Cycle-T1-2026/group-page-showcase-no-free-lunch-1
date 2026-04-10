@@ -62,7 +62,7 @@ import patsy
 
 ## Data Assumptions & Limitations
 
-2. Product Designs
+# Product Designs
 
 #### Cargo Loss
 Provides single-mission, all-risk coverage for physical loss or damage to declared cargo during transit, from operator handover to confirmed delivery. Claims are triggered by telemetry or post-arrival inspection, with cause-based deductibles reflecting incident severity. Coverage is conditional on full pre-launch risk disclosure and use of certified containers.
@@ -76,10 +76,10 @@ Provides protection for work-related injuries and illnesses, including those ari
 #### Business Interruption
 Covers loss of income and ongoing expenses resulting from operational disruptions, including equipment failure, energy issues, or environmental hazards. Claims are subject to a waiting period and risk-based deductibles, reflecting the high severity but low frequency of interruptions. Periodic policy reviews and environmental compliance checks are conducted annually or biannually to ensure adherence to operational protocols. 
 
-3. Model Building
+# Model Building
 Gilbert
 
-## 4. Capital Modelling
+# Capital Modelling
 
 The capital modelling was conducted to quantify the potential financial loss of each product line. The stochastic aggregate loss models are built for each hazard: Equipment Failure, Cargo Loss, Workers’ Compensation, and Business Interruption. 
 
@@ -182,7 +182,7 @@ This adjustment increases both expected loss and tail risk of the simulated resu
 
 
 
-5. Risk Considerations
+# Risk Considerations
 Olivia
 
 
