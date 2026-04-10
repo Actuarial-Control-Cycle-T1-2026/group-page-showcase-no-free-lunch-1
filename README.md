@@ -63,7 +63,9 @@ import patsy
 ## Data Assumptions & Limitations
 
 2. Product Designs
-Tanvir
+
+#### Cargo Loss
+Provides single-mission, all-risk coverage for physical loss or damage to declared cargo during transit, from operator handover to confirmed delivery. Claims are triggered by telemetry or post-arrival inspection, with cause-based deductibles reflecting incident severity. Coverage is conditional on full pre-launch risk disclosure and use of certified containers.
 
 3. Model Building
 Gilbert
