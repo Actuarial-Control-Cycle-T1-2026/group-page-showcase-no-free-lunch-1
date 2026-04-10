@@ -67,6 +67,10 @@ import patsy
 #### Cargo Loss
 Provides single-mission, all-risk coverage for physical loss or damage to declared cargo during transit, from operator handover to confirmed delivery. Claims are triggered by telemetry or post-arrival inspection, with cause-based deductibles reflecting incident severity. Coverage is conditional on full pre-launch risk disclosure and use of certified containers.
 
+#### Equipment Failure
+Covers repair or replacement costs for mechanical and electrical failures of mining equipment across multiple missions. Triggered by telemetry-confirmed operational failure, with deductibles scaled to usage intensity and environmental risk. Requires upfront disclosure of equipment characteristics and maintenance practices.
+
+
 3. Model Building
 Gilbert
 
