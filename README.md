@@ -183,11 +183,63 @@ This adjustment increases both expected loss and tail risk of the simulated resu
 
 
 # Risk Considerations
-Olivia
+
+#### Correlated Risk Scenarios
+Common external shocks such as solar storms introduce positive dependence between claim frequency and severity, as multiple solar systems may simultaneously experience disruptions. This leads to a heavier-tailed aggregate loss distribution than the independence assumption implies. The three solar systems differ meaningfully in their vulnerability to correlated events. 
+  - Bayesia System faces the greatest exposure to radiation-driven correlation, as its binary stars can produce simultaneous radiation spikes that elevate equipment failure and workers' compensation claims across all stations concurrently.
+  - Oryn Delta carries compounding risk, where dwarf star flares combined with asteroid disturbances could simultaneously trigger cargo loss, equipment failure, and business interruption across multiple sites.
+  - Helionis Cluster, while more stable, remains exposed to correlated debris events given its two outer asteroid clusters, which could affect multiple transit routes simultaneously.
+
+#### Threats & Mitigation Strategy
+Risks for each product lines were evaluated and mitigation strategies were provided.
+
+##### Cargo Loss
+| Threats | Likelihood | Severity | Rating | Mitigation |
+|---|:---|:---|:---|:---|
+| Solar storm/flare      | Moderate | Very High | Critical | Exclusion clause: Solar exclusion is predicted but undisclosed |
+| Debris field collision | Mod-High | High | High | Route declaration; density rating |
+| Total vessel loss      | Low | Catastrophic | High | Tier 1 deductible; Stop-loss reinsurance  |
+| Container failure      | Moderate | Moderate | Medium | Container certification |
+| Pilot error            | Moderate | Moderate | Medium | Experience rating factor |
+| Route deviation        | Low | Variable | Medium | Exclusion clause |
+| Willful misconduct     | Low | Variable | Low-Med | Exclusion clause; identified via investigation |
+
+##### Equipment Failure
+| Threats | Likelihood | Severity | Rating | Mitigation |
+|---|:---|:---|:---|:---|
+| Mechanical component failure             | Moderate | High      | High | Preventative maintenance requirements |
+| Control system / AI malfunction          | Low-Mod  | Very High | High | Diagnostic monitoring and system redundancy |
+| Radiation damage to electronics          | Moderate | High      | High | Radiation shielding and solar system risk rating |
+| Structural fatigue from heavy extraction | Moderate | High      | High | Equipment age rating and inspection requirements |
+| Debris impact on equipment               | Low-Mod  | High      | Medium-High | Protective shielding and environmental risk pricing |
+| Poor maintenance practices               | Moderate | Moderate  | Medium | Maintenance documentation and compliance requirements |
+
+##### Workers' Compensation
+| Threats | Likelihood | Severity | Rating | Mitigation |
+|---|:---|:---|:---|:---|
+| On-site injury (slips, trips, falls)     | Moderate | High      | High | Safety training, protective gear, and workplace inspections |
+| Exposure to hazardous materials          | Low-Mod  | High      | High | Personal protective equipment and monitoring protocols |
+| Fatigue-related accidents                | Moderate | Moderate      | Medium | Shift scheduling, rest periods, and workload monitoring |
+| Gravity or environmental hazards         | Low-Mod  | High      | Medium-High | Environmental controls, gravity-adapted equipment, and hazard awareness training |
+| Equipment misuse by staff                | Moderate | Moderate      | Medium | Standard operating procedures and supervision |
+| Wilful misconduct                        | Low      | Variable  | Low-Med | Policy exclusions and investigation procedures |
+
+##### Business Interruption
+| Threats | Likelihood | Severity | Rating | Mitigation |
+|---|:---|:---|:---|:---|
+| Major equipment malfunction                 | Moderate | High      | High | Preventative maintenance programs, equipment redundancy, and predictive monitoring systems |
+| Solar storm / extreme environmental event   | Low-Mod  | Very High | High | Hardened infrastructure, radiation shielding, and early warning space weather systems |
+| Energy system failure                       | Moderate | High      | Medium-High | Backup power systems, redundant energy grids, and energy storage capacity |
+| Supply chain disruption                     | Moderate  | Medium-High      | Medium | Diversified suppliers, inventory buffers, and alternative transport routes |
+| Infrastructure failure (station systems)    | Low-Mod | High      | Medium | Infrastructure inspections, redundancy in critical systems, and scheduled upgrades |
+| Operational shutdown due to a safety incident | Low      | Medium  | Low-Med | Strict safety protocols, worker training programs, and automated monitoring systems |
 
 
-
-
+#### ESG considerations
+ESG criteria are embedded as practical underwriting conditions:
+  - **Environmental:** waste-management plans and debris-mitigation compliance, with premium discounts of up to 5% available for verified adoption of lower-impact extraction technologies. 
+  - **Social:** minimum safety training and protective gear standards for workers' compensation.
+  - **Governance:** controls including third-party compliance verification and sanctions screening apply across all solar systems.
 
 
 
