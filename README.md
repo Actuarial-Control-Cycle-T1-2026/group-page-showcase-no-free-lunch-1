@@ -70,6 +70,9 @@ Provides single-mission, all-risk coverage for physical loss or damage to declar
 #### Equipment Failure
 Covers repair or replacement costs for mechanical and electrical failures of mining equipment across multiple missions. Triggered by telemetry-confirmed operational failure, with deductibles scaled to usage intensity and environmental risk. Requires upfront disclosure of equipment characteristics and maintenance practices.
 
+#### Workers’ Compensation
+Provides protection for work-related injuries and illnesses, including those arising from space-specific hazards such as radiation and low gravity. Benefits include income replacement, medical costs, and lump-sum compensation, subject to medical verification confirming the incident occurred at the workplace
+
 
 3. Model Building
 Gilbert
