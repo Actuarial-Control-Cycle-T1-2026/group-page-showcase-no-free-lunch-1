@@ -77,7 +77,160 @@ Provides protection for work-related injuries and illnesses, including those ari
 Covers loss of income and ongoing expenses resulting from operational disruptions, including equipment failure, energy issues, or environmental hazards. Claims are subject to a waiting period and risk-based deductibles, reflecting the high severity but low frequency of interruptions. Periodic policy reviews and environmental compliance checks are conducted annually or biannually to ensure adherence to operational protocols. 
 
 # Model Building
-Gilbert
+
+Model Building was conducted to estimate how often claims across the four hazard areas occur, and how large their expected claims would be. Analysis of the model and the construction of model involved EDA, data cleaning, and setting assumptions. Across all four hazard areas, frequency distributions were modelled using either a negative binomial or a poisson distribution, with the level of dispersion being them main differentiator. Severity distributions were modelled using visualisations of the data . Variables that were insignificant were also removed. This included variables with a p-value greater than 0.05, which was chosen as the threshold given the large size of the dataset, and any non-significant coefficient terms. Analysis on the adjusted R squared was done to explain the explatory power, and AIC and Pearson dispersion was used to determine the goodness of the fit of the model. Below contains the formulas used to model frequency and severity, and the decisions behind how we modelled it.
+
+#### Cargo Loss
+With a dispersion level of 4.51, which was calculated by the variance divided by the mean, frequency was modelled using a negative binomial GLM model using the following:
+```
+freq_formula = (
+    'claim_count ~ C(route_risk_cat, Treatment(reference="1"))'
+    ' + C(container_type_cat, Treatment(reference="longhaul vault canister"))'
+    ' + debris_density_z + pilot_experience_z + solar_radiation_z'
+)
+
+freq_glm = smf.glm(
+    formula=freq_formula,
+    data=freq_model_df,
+    family=sm.families.NegativeBinomial()
+).fit()
+print(freq_glm.summary())
+```
+
+This yielded parameters of r = 0.5370 and p = 0.6868.
+
+A severity ratio model was constructed for cargo loss, with the ratio being ```severity_ratio = claim_amount / cargo_value```. Under the assumption that claim amount is always less than the cargo value, a Beta GLM was determined to be the best fit through a visaulisation of the severity ratio data. 
+![severity_cargo_visual](image.png)
+
+This was then modelled using the the severity formula:
+```
+sev_formula = (
+    'severity_ratio ~ C(route_risk_cat, Treatment(reference="1"))'
+    ' + debris_density_z + solar_radiation_z'
+)
+
+y_sev, X_sev = dmatrices(sev_formula, data=sev_model_df, return_type='dataframe')
+y_sev_arr = y_sev.values.ravel()
+
+sev_beta = BetaModel(y_sev_arr, X_sev).fit(disp=False)
+print(sev_beta.summary())
+```
+
+The parameters were as follows: α = 1.3832 and β = 14.3850.
+
+#### Equipment Failure
+Pearson dispersion was measured as 1.0956, which is very close to 1, thus a poisson GLM was used to model for frequency. A frequency parameter of λ = 0.1839667 was yielded. The modelling is done as follows:
+```
+freq_formula = (
+    'claim_count ~ '
+    'C(equipment_type_cat, Treatment(reference="reglaggregators")) + '
+    'C(solar_system_cat, Treatment(reference="helionis cluster")) + '
+    'equipment_age_z + maintenance_int_z + usage_int_z'
+)
+
+freq_glm = smf.glm(
+    formula=freq_formula,
+    data=freq_model_df,
+    family=sm.families.Poisson(),
+    offset=freq_model_df['log_exposure']
+).fit()
+
+print(freq_glm.summary())
+```
+
+A gamma GLM was used to model for severity. A gamma distribution was chosen due to claim sizes being positive and right skewed, and thus, the log link function was chosen to ensure positive predictions and multiplicative effects. A gamma dispersion parameter of 0.231 was yielded, which is very good for a severity model. The modelling is as follows:
+```
+sev_formula = (
+    'claim_amount ~ C(equipment_type_cat)'
+    ' + C(solar_system_cat)'
+    ' + equipment_age_z'
+    ' + usage_int_z'
+)
+
+# -----------------------------
+# 4. Fit Gamma GLM
+# -----------------------------
+sev_glm = smf.glm(
+    formula=sev_formula,
+    data=sev_model_df,
+    family=sm.families.Gamma(link=sm.families.links.log())
+).fit()
+
+print(sev_glm.summary())
+```
+
+The parameters yielded were: shape = 4.32, scale = 11,100.
+
+#### Workers' Compensation
+A dispersion of 0.115 was yielded for frequency, thus a poisson GLM model was used. A parameter of λ = 0.017665 was also yielded. The modelling is as follows:
+```
+model_pois = smf.glm(
+    formula="""
+    claim_count ~ occupation  + accident_history_flag + psych_stress_index + safety_training_index
+    """,
+    data=freq_clean,
+    family=sm.families.Poisson(),
+    offset=np.log(freq_clean['exposure'])
+).fit()
+print(model_pois.summary())
+```
+
+For severity, a log-normal distribution was used as the claim amounts were very heavily right skewed with extreme fat tails. Visualisation was done as follows:
+![severity_workers_comp_visual](image-1.png)
+
+Thus, modelling was also done in the similar fashion to the others, with parameters of μ = 7.19821 and σ = 1.0786.
+```
+model_lognormal = smf.ols(
+    formula="""
+    log_claim ~ occupation + psych_stress_index + gravity_level + safety_training_index + protective_gear_quality
+    """,
+    data=sev_clean
+).fit()
+
+print(model_lognormal.summary())
+```
+
+#### Business Interruption
+Similar to cargo loss, a negative binomial GLM was used as the dispersion parameter was 1.73. Modelling was done as follows:
+```
+freq_formula = (
+    'claim_count ~ C(solar_system_cat, Treatment(reference="zeta"))'
+    ' + C(energy_backup_score_cat, Treatment(reference="1"))'
+    ' + supply_chain_index_z'
+    ' + maintenance_freq_z'
+    ' + avg_crew_exp_z'
+)
+
+freq_glm = smf.glm(
+    formula=freq_formula,
+    data=freq_model_df,
+    family=sm.families.NegativeBinomial(),
+    offset=freq_model_df['log_exposure']
+).fit()
+
+print(freq_glm.summary())
+```
+
+The parameters yielded were: r = 0.121553, p = 0.54720.
+
+Similar to equipment failure, a gamma GLM was used to model for severity, getting parameters of shape = 0.3538, scale = 12,327,906. Similar reasoning as to why we chose a gamma distribution applies. The visualisation is as follows.
+![severity_business_interruption_visual](image-2.png)
+
+The code we used is as follows.
+```
+sev_formula = (
+    'claim_amount ~ C(solar_system_cat, Treatment(reference="zeta"))'
+    ' + energy_backup_score_z + safety_compliance_z'
+)
+
+sev_glm = smf.glm(
+    formula=sev_formula,
+    data=sev_model_df,
+    family = sm.families.Gamma(link=sm.families.links.Log())
+).fit()
+
+print(sev_glm.summary())
+```
 
 # Capital Modelling
 
