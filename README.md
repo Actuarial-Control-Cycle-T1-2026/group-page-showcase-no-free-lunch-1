@@ -1,26 +1,7 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/FxAEmrI0)
-# Actuarial Theory and Practice A
+# Actuarial Theory and Practice A Assignment - Team No Free Lunch
 
 _"Tell me and I forget. Teach me and I remember. Involve me and I learn." – Benjamin Franklin_
-
----
-
-### Congrats on completing the [2026 SOA Research Challenge](https://www.soa.org/research/opportunities/2026-student-research-case-study-challenge/)!
-
-
-> Now it's time to build your own website to showcase your work.  
-> Creating a website using GitHub Pages is simple and a great way to present your project.
-
-This page is written in Markdown.
-- Click the [assignment link](https://classroom.github.com/a/FxAEmrI0) to accept your assignment.
-
----
-
-> Be creative! You can embed or link your [data](player_data_salaries_2020.csv), [code](sample-data-clean.ipynb), and [images](ACC.png) here.
-
-More information on GitHub Pages can be found [here](https://pages.github.com/).
-
-![](Actuarial.gif)
 
 ## Objective Overview
 
@@ -55,14 +36,36 @@ import statsmodels
 import warnings
 import patsy
 ```
-**R**
+**R (Capital Modelling)**
 ```r
-
+library(readxl)
+library(ggplot2)
 ```
 
-## Data Assumptions & Limitations
+## Data
 
-# Product Designs
+#### Data Cleaning
+
+The raw SOA dataset provided contained records with varying data integrity issues, including values out of range of the dictionary definition, inconsistent data classes, and wrongly formatted data. Due to a lack of context with regards to the data collection process, we standardised our data cleaning approach to omit any badly formatted or incorrect (per data dictionary) entries instead of attempting to amend.
+
+For example, these rules were constructed for the cargo loss dataset:
+| Issue | Action |
+|---|---|
+| Corrupted categoricals | Remove |
+| Out-of-range physical values | Remove |
+| `route_risk` outside integer [1,5] | Remove |
+| Non-integer / out-of-range `claim_count` | Remove |
+| `severity_ratio` outside (0,1) | Remove |
+| Duplicate `(policy_id, shipment_id)` | Keep first occurrence |
+| Missing key model variables | Row-wise drop |
+
+This data cleaning step removed an average of 3% of records across the 4 sets of frequency and claim datasets, with the highest being 6% in Cargo loss and lowest being 1% in Equipment Failure.
+
+## Data Limitations
+
+We identified a mismatch between some solar systems provided in training data, (Epsilon, Zeta) and the solar systems that GGIC aims to insure (Bayesia, Oryn Delta). Using the provided encyclopedia containing qualitative descriptions and accounts of each solar system, we identified the systems with the most similar risk profiles and used them as a proxy for analysis.
+
+## Product Designs
 
 #### Cargo Loss
 Provides single-mission, all-risk coverage for physical loss or damage to declared cargo during transit, from operator handover to confirmed delivery. Claims are triggered by telemetry or post-arrival inspection, with cause-based deductibles reflecting incident severity. Coverage is conditional on full pre-launch risk disclosure and use of certified containers.
@@ -76,7 +79,7 @@ Provides protection for work-related injuries and illnesses, including those ari
 #### Business Interruption
 Covers loss of income and ongoing expenses resulting from operational disruptions, including equipment failure, energy issues, or environmental hazards. Claims are subject to a waiting period and risk-based deductibles, reflecting the high severity but low frequency of interruptions. Periodic policy reviews and environmental compliance checks are conducted annually or biannually to ensure adherence to operational protocols. 
 
-# Model Building
+## Model Building
 
 Model Building was conducted to estimate how often claims across the four hazard areas occur, and how large their expected claims would be. Analysis of the model and the construction of model involved EDA, data cleaning, and setting assumptions. Across all four hazard areas, frequency distributions were modelled using either a negative binomial or a poisson distribution, with the level of dispersion being them main differentiator. Severity distributions were modelled using visualisations of the data . Variables that were insignificant were also removed. This included variables with a p-value greater than 0.05, which was chosen as the threshold given the large size of the dataset, and any non-significant coefficient terms. Analysis on the adjusted R squared was done to explain the explatory power, and AIC and Pearson dispersion was used to determine the goodness of the fit of the model. Below contains the formulas used to model frequency and severity, and the decisions behind how we modelled it.
 
@@ -232,7 +235,7 @@ sev_glm = smf.glm(
 print(sev_glm.summary())
 ```
 
-# Capital Modelling
+## Capital Modelling
 
 The capital modelling was conducted to quantify the potential financial loss of each product line. The stochastic aggregate loss models are built for each hazard: Equipment Failure, Cargo Loss, Workers’ Compensation, and Business Interruption. 
 
@@ -333,9 +336,7 @@ As a final but important step, we accounted for inflation by indexing claim seve
 
 This adjustment increases both expected loss and tail risk of the simulated results.
 
-
-
-# Risk Considerations
+## Risk Considerations
 
 #### Correlated Risk Scenarios
 Common external shocks such as solar storms introduce positive dependence between claim frequency and severity, as multiple solar systems may simultaneously experience disruptions. This leads to a heavier-tailed aggregate loss distribution than the independence assumption implies. The three solar systems differ meaningfully in their vulnerability to correlated events. 
@@ -393,6 +394,34 @@ ESG criteria are embedded as practical underwriting conditions:
   - **Environmental:** waste-management plans and debris-mitigation compliance, with premium discounts of up to 5% available for verified adoption of lower-impact extraction technologies. 
   - **Social:** minimum safety training and protective gear standards for workers' compensation.
   - **Governance:** controls including third-party compliance verification and sanctions screening apply across all solar systems.
+
+## Assumptions
+
+#### Global Assumptions
+1. **No correlation between solar systems for models:** Claims are assumed independent across solar systems. This is a simplifying assumption acknowledged to be a lower bound on tail risk under correlated shock scenarios such as galactic solar storms.
+2.  **Loadings:** Expense 15%, profit 10%, risk 5% applied multiplicatively to pure premium to reflect high tail risk.
+3.  **Claim independence:** Claim occurrences and claim severities are independent across stations, solar systems, and time periods.
+4. **Stationarity:** Historical dataset between operational variables and claims experience will hold in future operations.
+
+#### Cargo Loss
+
+1. **Severity < cargo value:** Claim amount strictly less than cargo value (severity ratio ∈ (0,1)), justifying Beta regression. Any replacement or consequential costs beyond this are explicitly excluded, reducing moral hazard.
+2. **Stationarity:** Historical covariate–loss relationships assumed to be stable over the projection period. No long-run trend data exists to challenge this.
+
+#### Equipment Failure
+
+1. **Claim Capping:** All claim amounts above $790k capped at $790K (upper bound specified in the data dictionary).
+2. **Equipment Type:** Use the equipment types in the data (slight discrepancy between the data dictionary and the actual data).
+
+#### Workers' Compensation
+
+1. **No Policy Limit:** Claims severity is assumed not to be affected by policy limits or deductibles.
+2. **Non-significant covariates excluded:** Solar system, employment type, experience years, hours per week, supervision level, base salary, injury type, and injury causes.
+
+#### Business Interruption
+
+1. **No major systematic shock events in baseline modelling:** The baseline model assumes normal operational conditions and does not explicitly incorporate rare systemic events.
+
 
 
 
