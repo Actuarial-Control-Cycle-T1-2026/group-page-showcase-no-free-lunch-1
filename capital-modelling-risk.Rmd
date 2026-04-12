@@ -1,0 +1,1386 @@
+---
+title: "ACTL4001 Capital Modelling and Risk Assessment"
+author: "SL"
+date: "2026-03-08"
+output: html_document
+---
+
+
+3a). Aggregate loss simulation in R
+
+1. Equipment Failure
+
+```{r}
+# =========================
+# Q3(a) Equipment Failure
+# Aggregate loss distribution
+# =========================
+
+set.seed(123)
+
+n_sim <- 100000
+
+# -------------------------
+# 1. Inputs
+# -------------------------
+lambda_eq <- 0.1839667
+
+mean_eq  <- 48000
+disp_eq  <- 0.2312777
+shape_eq <- 4.32
+scale_eq <- 11100
+
+# -------------------------
+# 2. Simulate aggregate loss
+# -------------------------
+eq_loss <- numeric(n_sim)
+
+for(i in 1:n_sim){
+  
+  n_claims <- rpois(1, lambda = lambda_eq)
+  
+  if(n_claims > 0){
+    eq_loss[i] <- sum(
+      rgamma(n_claims,
+             shape = shape_eq,
+             scale = scale_eq)
+    )
+  }
+}
+
+# -------------------------
+# 3. Summary statistics
+# -------------------------
+var95_eq <- as.numeric(quantile(eq_loss, 0.95))
+var99_eq <- as.numeric(quantile(eq_loss, 0.99))
+var995_eq <- as.numeric(quantile(eq_loss, 0.995))
+
+eq_summary <- data.frame(
+  Metric = c("Expected annual loss",
+             "Variance",
+             "Standard deviation",
+             "95% VaR",
+             "99% VaR",
+             "99.5% VaR"),
+  Value = c(mean(eq_loss),
+            var(eq_loss),
+            sd(eq_loss),
+            var95_eq,
+            var99_eq,
+            var995_eq)
+)
+
+eq_summary
+
+# -------------------------
+# 4. Plot aggregate loss distribution
+# -------------------------
+hist(eq_loss,
+     breaks = 50,
+     xlim = c(0, max(var99_eq * 1.15, max(eq_loss))),
+     main = "Equipment Failure Aggregate Loss Distribution",
+     xlab = "Annual Aggregate Loss",
+     ylab = "Frequency",
+     col = "lightgrey",
+     border = "grey40")
+
+abline(v = var95_eq, col = "blue", lty = 2, lwd = 2)
+abline(v = var99_eq, col = "red",  lty = 2, lwd = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR"),
+       col = c("blue", "red"),
+       lty = 2,
+       lwd = 2,
+       bty = "n")
+```
+
+
+
+
+
+3a). Aggregate loss simulation in R
+
+2. Business Interruption
+
+```{r}
+
+# =========================
+# Business Interruption Capital Modelling
+# Q3(a) Aggregate Loss Distribution
+# =========================
+
+set.seed(123)
+
+n_sim <- 100000
+
+# -------------------------
+# 1. Parameters
+# -------------------------
+# Frequency: Negative Binomial
+r_bi <- 0.121553
+p_bi <- 0.547205
+
+# Severity: Gamma
+shape_bi <- 0.3538
+scale_bi <- 12327906.40
+
+# -------------------------
+# 2. Simulate aggregate losses
+# -------------------------
+# Step 1: simulate claim counts
+n_claims <- rnbinom(n_sim, size = r_bi, prob = p_bi)
+
+# Step 2: simulate aggregate loss for each year
+bi_loss <- numeric(n_sim)
+
+for (i in seq_len(n_sim)) {
+  if (n_claims[i] > 0) {
+    bi_loss[i] <- sum(rgamma(n_claims[i],
+                             shape = shape_bi,
+                             scale = scale_bi))
+  }
+}
+
+# -------------------------
+# 3. Summary statistics
+# -------------------------
+mean_loss <- mean(bi_loss)
+var_loss  <- var(bi_loss)
+sd_loss   <- sd(bi_loss)
+
+VaR90  <- as.numeric(quantile(bi_loss, 0.90))
+VaR95  <- as.numeric(quantile(bi_loss, 0.95))
+VaR99  <- as.numeric(quantile(bi_loss, 0.99))
+VaR995 <- as.numeric(quantile(bi_loss, 0.995))
+VaR999 <- as.numeric(quantile(bi_loss, 0.999))
+
+summary_table <- data.frame(
+  Metric = c("Mean Annual Loss",
+             "Variance",
+             "Standard Deviation",
+             "90th Percentile (VaR 90)",
+             "95th Percentile (VaR 95)",
+             "99th Percentile (VaR 99)",
+             "99.5th Percentile (VaR 99.5)",
+             "99.9th Percentile (VaR 99.9)"),
+  Value = c(mean_loss, var_loss, sd_loss, VaR90, VaR95, VaR99, VaR995, VaR999)
+)
+
+print(summary_table)
+
+# Optional: nicer display without scientific notation
+summary_table$Value <- format(round(summary_table$Value, 2), big.mark = ",", scientific = FALSE)
+print(summary_table)
+
+# -------------------------
+# 4. Plot 1: Full distribution
+# -------------------------
+hist(bi_loss,
+     breaks = 100,
+     main = "Business Interruption Aggregate Loss Distribution (Full Scale)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightblue",
+     border = "grey40")
+
+abline(v = VaR95, col = "blue", lty = 2, lwd = 2)
+abline(v = VaR99, col = "red", lty = 2, lwd = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR"),
+       col = c("blue", "red"),
+       lty = 2,
+       lwd = 2,
+       bty = "n")
+
+# -------------------------
+# 5. Plot 2: Zoomed-in distribution
+# -------------------------
+hist(bi_loss,
+     breaks = 100,
+     xlim = c(0, VaR99 * 1.2),
+     main = "Business Interruption Aggregate Loss Distribution (Zoomed)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightblue",
+     border = "grey40")
+
+abline(v = VaR95, col = "blue", lty = 2, lwd = 2)
+abline(v = VaR99, col = "red", lty = 2, lwd = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR"),
+       col = c("blue", "red"),
+       lty = 2,
+       lwd = 2,
+       bty = "n")
+
+# -------------------------
+# 6. Additional diagnostics
+# -------------------------
+cat("Probability of zero aggregate loss =", mean(bi_loss == 0), "\n")
+cat("Maximum simulated loss =", max(bi_loss), "\n")
+```
+
+
+
+
+
+3. Cargo Loss
+
+
+```{r}
+# =========================
+# Cargo Loss Capital Modelling
+# Q3(a) Aggregate loss distribution
+# =========================
+
+library(readxl)
+
+cargo_data_raw <- read_excel("~/OneDrive - UNSW/Actuarial Institute/ACC1/SOA_2026_Case_Study_Materials/srcsc-2026-claims-cargo.xlsx")
+
+set.seed(123)
+
+n_sim <- 100000
+
+# -------------------------
+# 1. Inputs
+# -------------------------
+r_cargo <- 0.5370
+p_cargo <- 0.6868
+
+a_cargo <- 1.3832
+b_cargo <- 14.3850
+
+# Use observed cargo values from raw data
+cargo_values <- cargo_data_raw$cargo_value
+cargo_values <- cargo_values[!is.na(cargo_values) & cargo_values > 0]
+
+# -------------------------
+# 2. Simulate aggregate cargo loss
+# -------------------------
+cargo_loss <- numeric(n_sim)
+
+for(i in 1:n_sim){
+  
+  n_claims <- rnbinom(1, size = r_cargo, prob = p_cargo)
+  
+  if(n_claims > 0){
+    # Simulate proportional loss
+    damage_ratio <- rbeta(n_claims, shape1 = a_cargo, shape2 = b_cargo)
+    
+    # Sample shipment values from observed portfolio
+    sampled_values <- sample(cargo_values, size = n_claims, replace = TRUE)
+    
+    # Dollar loss = damage ratio × cargo value
+    losses <- damage_ratio * sampled_values
+    
+    cargo_loss[i] <- sum(losses)
+  }
+}
+
+# -------------------------
+# 3. Summary table
+# -------------------------
+var95_cargo  <- as.numeric(quantile(cargo_loss, 0.95))
+var99_cargo  <- as.numeric(quantile(cargo_loss, 0.99))
+var995_cargo <- as.numeric(quantile(cargo_loss, 0.995))
+
+cargo_summary <- data.frame(
+  Metric = c("Expected annual loss",
+             "Variance",
+             "Standard deviation",
+             "95% VaR",
+             "99% VaR",
+             "99.5% VaR"),
+  Value = c(mean(cargo_loss),
+            var(cargo_loss),
+            sd(cargo_loss),
+            var95_cargo,
+            var99_cargo,
+            var995_cargo)
+)
+
+cargo_summary
+
+
+# -------------------------
+# 4. Plotting
+# -------------------------
+hist(cargo_loss,
+     breaks = 40,
+     main = "Cargo Aggregate Loss Distribution",
+     xlab = "Annual Aggregate Loss",
+     col = "lightgrey",
+     border = "black")
+
+abline(v = var95_cargo, col = "blue", lwd = 2, lty = 2)
+abline(v = var99_cargo, col = "red", lwd = 2, lty = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR"),
+       col = c("blue", "red"),
+       lty = c(2, 2),
+       lwd = 2,
+       bty = "n")
+```
+
+4. Worker's Compensation
+
+
+
+```{r}
+# =========================
+# Workers' Compensation Capital Modelling
+# Q3(a) Aggregate Loss Distribution
+# =========================
+
+set.seed(123)
+
+n_sim <- 100000
+
+# -------------------------
+# 1. Parameters
+# -------------------------
+# Frequency: Poisson
+lambda_wc <- 0.017665
+
+# Severity: Lognormal
+mu_wc <- 7.619821
+sigma2_wc <- 1.163305
+sigma_wc <- sqrt(sigma2_wc)
+
+# -------------------------
+# 2. Simulate aggregate losses
+# -------------------------
+# Simulate annual claim counts
+n_claims <- rpois(n_sim, lambda = lambda_wc)
+
+# Simulate annual aggregate losses
+wc_loss <- numeric(n_sim)
+
+for (i in seq_len(n_sim)) {
+  if (n_claims[i] > 0) {
+    wc_loss[i] <- sum(rlnorm(n_claims[i],
+                             meanlog = mu_wc,
+                             sdlog = sigma_wc))
+  }
+}
+
+# -------------------------
+# 3. Summary statistics
+# -------------------------
+mean_loss <- mean(wc_loss)
+var_loss  <- var(wc_loss)
+sd_loss   <- sd(wc_loss)
+
+VaR90  <- as.numeric(quantile(wc_loss, 0.90))
+VaR95  <- as.numeric(quantile(wc_loss, 0.95))
+VaR99  <- as.numeric(quantile(wc_loss, 0.99))
+VaR995 <- as.numeric(quantile(wc_loss, 0.995))
+VaR999 <- as.numeric(quantile(wc_loss, 0.999))
+
+summary_table <- data.frame(
+  Metric = c("Mean Annual Loss",
+             "Variance",
+             "Standard Deviation",
+             "90th Percentile (VaR 90)",
+             "95th Percentile (VaR 95)",
+             "99th Percentile (VaR 99)",
+             "99.5th Percentile (VaR 99.5)",
+             "99.9th Percentile (VaR 99.9)"),
+  Value = c(mean_loss, var_loss, sd_loss, VaR90, VaR95, VaR99, VaR995, VaR999)
+)
+
+print(summary_table)
+
+# Optional formatting for report tables
+summary_table_fmt <- summary_table
+summary_table_fmt$Value <- format(round(summary_table_fmt$Value, 2),
+                                  big.mark = ",",
+                                  scientific = FALSE)
+print(summary_table_fmt)
+
+# -------------------------
+# 4. Diagnostics
+# -------------------------
+prob_zero <- mean(wc_loss == 0)
+max_loss  <- max(wc_loss)
+
+cat("Probability of zero aggregate loss =", prob_zero, "\n")
+cat("Maximum simulated loss =", max_loss, "\n")
+
+# -------------------------
+# 5. Plot 1: Full distribution
+# -------------------------
+hist(wc_loss,
+     breaks = 100,
+     main = "Workers' Compensation Aggregate Loss Distribution (Full Scale)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightblue",
+     border = "grey40")
+
+abline(v = VaR95, col = "blue", lty = 2, lwd = 2)
+abline(v = VaR99, col = "red", lty = 2, lwd = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR"),
+       col = c("blue", "red"),
+       lty = 2,
+       lwd = 2,
+       bty = "n")
+
+# -------------------------
+# 6. Plot 2: Zoomed distribution
+# -------------------------
+hist(wc_loss,
+     breaks = 100,
+     xlim = c(0, VaR99 * 1.2),
+     main = "Workers' Compensation Aggregate Loss Distribution (Zoomed)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightblue",
+     border = "grey40")
+
+abline(v = VaR95, col = "blue", lty = 2, lwd = 2)
+abline(v = VaR99, col = "red", lty = 2, lwd = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR"),
+       col = c("blue", "red"),
+       lty = 2,
+       lwd = 2,
+       bty = "n")
+```
+
+
+
+
+3b).Stress testing for extreme scenarios (e.g., 1-in-100 year events)
+
+Equipment Failure
+
+```{r}
+# =========================
+# Equipment Failure Capital Modelling
+# Q3(b) Stress testing for extreme scenarios
+# =========================
+
+rm(list = ls())
+set.seed(123)
+
+# -------------------------
+# 1. Inputs
+# -------------------------
+n_sim <- 100000
+
+# Baseline model from Q3(a)
+lambda_eq <- 0.1839667
+shape_eq  <- 4.32
+scale_eq  <- 11100
+
+# -------------------------
+# 2. Scenario assumptions
+# -------------------------
+scenario_assumptions <- data.frame(
+  Scenario = c("Baseline", "Moderate Stress", "Extreme Stress"),
+  Lambda_Multiplier = c(1.00, 1.25, 1.50),
+  Severity_Multiplier = c(1.00, 1.15, 1.30),
+  Scenario_Description = c(
+    "Normal operating conditions",
+    "Elevated operational strain and minor system disruption",
+    "Severe disruption such as solar storm or systemic malfunction"
+  ),
+  stringsAsFactors = FALSE
+)
+
+# -------------------------
+# 3. Simulation function
+# -------------------------
+simulate_compound_poisson_gamma <- function(n_sim, lambda, shape, scale) {
+  claim_count <- rpois(n_sim, lambda)
+  agg_loss <- numeric(n_sim)
+  
+  for (i in seq_len(n_sim)) {
+    if (claim_count[i] > 0) {
+      agg_loss[i] <- sum(
+        rgamma(claim_count[i], shape = shape, scale = scale)
+      )
+    }
+  }
+  
+  list(
+    agg_loss = agg_loss,
+    claim_count = claim_count
+  )
+}
+
+# -------------------------
+# 4. Summary function
+# -------------------------
+summarise_scenario <- function(losses, counts, scenario_name) {
+  data.frame(
+    Scenario = scenario_name,
+    Expected_Annual_Loss = mean(losses),
+    Variance = var(losses),
+    Standard_Deviation = sd(losses),
+    VaR_95 = as.numeric(quantile(losses, 0.95)),
+    VaR_99 = as.numeric(quantile(losses, 0.99)),
+    VaR_995 = as.numeric(quantile(losses, 0.995)),
+    Prob_Zero_Loss = mean(losses == 0),
+    Prob_1_Claim = mean(counts == 1),
+    Prob_2_Claims = mean(counts == 2),
+    Prob_3plus_Claims = mean(counts >= 3)
+  )
+}
+
+# -------------------------
+# 5. Run all scenarios
+# -------------------------
+scenario_results <- list()
+summary_table <- data.frame()
+
+for (i in seq_len(nrow(scenario_assumptions))) {
+  
+  scenario_name <- scenario_assumptions$Scenario[i]
+  lambda_i <- lambda_eq * scenario_assumptions$Lambda_Multiplier[i]
+  scale_i  <- scale_eq  * scenario_assumptions$Severity_Multiplier[i]
+  
+  sim_i <- simulate_compound_poisson_gamma(
+    n_sim = n_sim,
+    lambda = lambda_i,
+    shape = shape_eq,
+    scale = scale_i
+  )
+  
+  scenario_results[[scenario_name]] <- sim_i
+  
+  summary_i <- summarise_scenario(
+    losses = sim_i$agg_loss,
+    counts = sim_i$claim_count,
+    scenario_name = scenario_name
+  )
+  
+  summary_table <- rbind(summary_table, summary_i)
+}
+
+# -------------------------
+# 6. Add stress ratios vs baseline
+# -------------------------
+baseline_expected <- summary_table$Expected_Annual_Loss[summary_table$Scenario == "Baseline"]
+baseline_var99    <- summary_table$VaR_99[summary_table$Scenario == "Baseline"]
+baseline_var995   <- summary_table$VaR_995[summary_table$Scenario == "Baseline"]
+
+summary_table$Expected_Loss_Ratio_vs_Baseline <- summary_table$Expected_Annual_Loss / baseline_expected
+summary_table$VaR99_Ratio_vs_Baseline         <- summary_table$VaR_99 / baseline_var99
+summary_table$VaR995_Ratio_vs_Baseline        <- summary_table$VaR_995 / baseline_var995
+
+# -------------------------
+# 7. Main report-style comparison table
+# -------------------------
+main_scenario_table <- data.frame(
+  Metric = c(
+    "Expected annual loss",
+    "Variance",
+    "Standard deviation",
+    "95% VaR",
+    "99% VaR",
+    "99.5% VaR",
+    "Expected loss ratio vs baseline",
+    "99% VaR ratio vs baseline",
+    "99.5% VaR ratio vs baseline"
+  ),
+  
+  Baseline = c(
+    round(summary_table$Expected_Annual_Loss[summary_table$Scenario == "Baseline"], 0),
+    round(summary_table$Variance[summary_table$Scenario == "Baseline"], 0),
+    round(summary_table$Standard_Deviation[summary_table$Scenario == "Baseline"], 0),
+    round(summary_table$VaR_95[summary_table$Scenario == "Baseline"], 0),
+    round(summary_table$VaR_99[summary_table$Scenario == "Baseline"], 0),
+    round(summary_table$VaR_995[summary_table$Scenario == "Baseline"], 0),
+    round(summary_table$Expected_Loss_Ratio_vs_Baseline[summary_table$Scenario == "Baseline"], 2),
+    round(summary_table$VaR99_Ratio_vs_Baseline[summary_table$Scenario == "Baseline"], 2),
+    round(summary_table$VaR995_Ratio_vs_Baseline[summary_table$Scenario == "Baseline"], 2)
+  ),
+  
+  Moderate_Stress = c(
+    round(summary_table$Expected_Annual_Loss[summary_table$Scenario == "Moderate Stress"], 0),
+    round(summary_table$Variance[summary_table$Scenario == "Moderate Stress"], 0),
+    round(summary_table$Standard_Deviation[summary_table$Scenario == "Moderate Stress"], 0),
+    round(summary_table$VaR_95[summary_table$Scenario == "Moderate Stress"], 0),
+    round(summary_table$VaR_99[summary_table$Scenario == "Moderate Stress"], 0),
+    round(summary_table$VaR_995[summary_table$Scenario == "Moderate Stress"], 0),
+    round(summary_table$Expected_Loss_Ratio_vs_Baseline[summary_table$Scenario == "Moderate Stress"], 2),
+    round(summary_table$VaR99_Ratio_vs_Baseline[summary_table$Scenario == "Moderate Stress"], 2),
+    round(summary_table$VaR995_Ratio_vs_Baseline[summary_table$Scenario == "Moderate Stress"], 2)
+  ),
+  
+  Extreme_Stress = c(
+    round(summary_table$Expected_Annual_Loss[summary_table$Scenario == "Extreme Stress"], 0),
+    round(summary_table$Variance[summary_table$Scenario == "Extreme Stress"], 0),
+    round(summary_table$Standard_Deviation[summary_table$Scenario == "Extreme Stress"], 0),
+    round(summary_table$VaR_95[summary_table$Scenario == "Extreme Stress"], 0),
+    round(summary_table$VaR_99[summary_table$Scenario == "Extreme Stress"], 0),
+    round(summary_table$VaR_995[summary_table$Scenario == "Extreme Stress"], 0),
+    round(summary_table$Expected_Loss_Ratio_vs_Baseline[summary_table$Scenario == "Extreme Stress"], 2),
+    round(summary_table$VaR99_Ratio_vs_Baseline[summary_table$Scenario == "Extreme Stress"], 2),
+    round(summary_table$VaR995_Ratio_vs_Baseline[summary_table$Scenario == "Extreme Stress"], 2)
+  )
+)
+
+cat("=== Equipment Failure: Stress Testing Comparison Table ===\n")
+print(main_scenario_table)
+
+# Optional formatted version for Word-ready copying
+main_scenario_table_fmt <- main_scenario_table
+main_scenario_table_fmt[-1] <- lapply(main_scenario_table_fmt[-1], function(x) {
+  ifelse(x >= 1000, format(x, big.mark = ",", scientific = FALSE), as.character(x))
+})
+cat("\n=== Formatted Equipment Failure Stress Table ===\n")
+print(main_scenario_table_fmt, row.names = FALSE)
+
+# -------------------------
+# 8. Appendix-style diagnostic table
+# -------------------------
+diagnostic_table <- data.frame(
+  Metric = c(
+    "Probability of zero loss",
+    "Probability of 1 claim",
+    "Probability of 2 claims",
+    "Probability of 3+ claims"
+  ),
+  
+  Baseline = c(
+    round(summary_table$Prob_Zero_Loss[summary_table$Scenario == "Baseline"], 4),
+    round(summary_table$Prob_1_Claim[summary_table$Scenario == "Baseline"], 4),
+    round(summary_table$Prob_2_Claims[summary_table$Scenario == "Baseline"], 4),
+    round(summary_table$Prob_3plus_Claims[summary_table$Scenario == "Baseline"], 4)
+  ),
+  
+  Moderate_Stress = c(
+    round(summary_table$Prob_Zero_Loss[summary_table$Scenario == "Moderate Stress"], 4),
+    round(summary_table$Prob_1_Claim[summary_table$Scenario == "Moderate Stress"], 4),
+    round(summary_table$Prob_2_Claims[summary_table$Scenario == "Moderate Stress"], 4),
+    round(summary_table$Prob_3plus_Claims[summary_table$Scenario == "Moderate Stress"], 4)
+  ),
+  
+  Extreme_Stress = c(
+    round(summary_table$Prob_Zero_Loss[summary_table$Scenario == "Extreme Stress"], 4),
+    round(summary_table$Prob_1_Claim[summary_table$Scenario == "Extreme Stress"], 4),
+    round(summary_table$Prob_2_Claims[summary_table$Scenario == "Extreme Stress"], 4),
+    round(summary_table$Prob_3plus_Claims[summary_table$Scenario == "Extreme Stress"], 4)
+  )
+)
+
+cat("\n=== Equipment Failure: Diagnostic Table ===\n")
+print(diagnostic_table)
+
+# -------------------------
+# 9. Plot baseline distribution with VaR lines
+# -------------------------
+eq_loss_baseline <- scenario_results[["Baseline"]]$agg_loss
+VaR95_eq  <- as.numeric(quantile(eq_loss_baseline, 0.95))
+VaR99_eq  <- as.numeric(quantile(eq_loss_baseline, 0.99))
+VaR995_eq <- as.numeric(quantile(eq_loss_baseline, 0.995))
+
+hist(eq_loss_baseline,
+     breaks = 40,
+     xlim = c(0, max(VaR995_eq * 1.2, max(eq_loss_baseline))),
+     main = "Equipment Failure Aggregate Loss Distribution (Baseline)",
+     xlab = "Annual Aggregate Loss",
+     ylab = "Frequency",
+     col = "lightgrey",
+     border = "black")
+
+abline(v = VaR95_eq,  col = "blue",  lwd = 2, lty = 2)
+abline(v = VaR99_eq,  col = "red",   lwd = 2, lty = 2)
+abline(v = VaR995_eq, col = "darkgreen", lwd = 2, lty = 2)
+
+legend("topright",
+       legend = c("95% VaR", "99% VaR", "99.5% VaR"),
+       col = c("blue", "red", "darkgreen"),
+       lty = c(2, 2, 2),
+       lwd = 2,
+       bty = "n")
+
+# -------------------------
+# 10. Plot scenario comparison
+# -------------------------
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     xlim = c(0, max(
+       quantile(scenario_results[["Extreme Stress"]]$agg_loss, 0.995) * 1.2,
+       max(scenario_results[["Extreme Stress"]]$agg_loss)
+     )),
+     main = "Equipment Failure: Scenario Comparison",
+     xlab = "Annual Aggregate Loss",
+     ylab = "Frequency",
+     col = rgb(0, 0, 1, 0.25),
+     border = "blue")
+
+hist(scenario_results[["Moderate Stress"]]$agg_loss,
+     breaks = 40,
+     add = TRUE,
+     col = rgb(1, 0.5, 0, 0.25),
+     border = "orange")
+
+hist(scenario_results[["Extreme Stress"]]$agg_loss,
+     breaks = 40,
+     add = TRUE,
+     col = rgb(1, 0, 0, 0.25),
+     border = "red")
+
+legend("topright",
+       legend = c("Baseline", "Moderate Stress", "Extreme Stress"),
+       fill = c(
+         rgb(0, 0, 1, 0.25),
+         rgb(1, 0.5, 0, 0.25),
+         rgb(1, 0, 0, 0.25)
+       ),
+       border = c("blue", "orange", "red"),
+       bty = "n")
+```
+
+
+3b).Stress testing for extreme scenarios (e.g., 1-in-100 year events)
+
+Business Interruption
+
+```{r}
+# =========================
+# Business Interruption Capital Modelling
+# Q3(b) Stress testing for extreme scenarios
+# =========================
+
+rm(list = ls())
+set.seed(123)
+
+# -------------------------
+# 1. Inputs
+# -------------------------
+n_sim <- 100000
+
+# Baseline model from Q3(a)
+r_bi <- 0.121553
+p_bi <- 0.547205
+shape_bi <- 0.3538
+scale_bi <- 12327906.40
+
+# -------------------------
+# 2. Scenario assumptions
+# -------------------------
+scenario_assumptions <- data.frame(
+  Scenario = c("Baseline", "Moderate Stress", "Extreme Stress"),
+  Frequency_Multiplier = c(1.00, 1.20, 1.40),
+  Severity_Multiplier = c(1.00, 1.25, 1.50),
+  stringsAsFactors = FALSE
+)
+
+# -------------------------
+# 3. Simulation function
+# -------------------------
+simulate_compound_nbinom_gamma <- function(n_sim, size, prob, freq_mult, shape, scale, sev_mult) {
+  claim_count <- rnbinom(n_sim, size = size * freq_mult, prob = prob)
+  agg_loss <- numeric(n_sim)
+  
+  for (i in seq_len(n_sim)) {
+    if (claim_count[i] > 0) {
+      agg_loss[i] <- sum(
+        rgamma(claim_count[i], shape = shape, scale = scale * sev_mult)
+      )
+    }
+  }
+  
+  list(agg_loss = agg_loss, claim_count = claim_count)
+}
+
+# -------------------------
+# 4. Summary function
+# -------------------------
+summarise_scenario <- function(losses, counts, scenario_name) {
+  data.frame(
+    Scenario = scenario_name,
+    Expected_Annual_Loss = mean(losses),
+    Variance = var(losses),
+    Standard_Deviation = sd(losses),
+    VaR_95 = as.numeric(quantile(losses, 0.95)),
+    VaR_99 = as.numeric(quantile(losses, 0.99)),
+    VaR_995 = as.numeric(quantile(losses, 0.995)),
+    Prob_Zero_Loss = mean(losses == 0),
+    Prob_1_Claim = mean(counts == 1),
+    Prob_2plus_Claims = mean(counts >= 2)
+  )
+}
+
+# -------------------------
+# 5. Run scenarios
+# -------------------------
+scenario_results <- list()
+summary_table <- data.frame()
+
+for (i in seq_len(nrow(scenario_assumptions))) {
+  sim_i <- simulate_compound_nbinom_gamma(
+    n_sim = n_sim,
+    size = r_bi,
+    prob = p_bi,
+    freq_mult = scenario_assumptions$Frequency_Multiplier[i],
+    shape = shape_bi,
+    scale = scale_bi,
+    sev_mult = scenario_assumptions$Severity_Multiplier[i]
+  )
+  
+  scenario_results[[scenario_assumptions$Scenario[i]]] <- sim_i
+  
+  summary_i <- summarise_scenario(
+    losses = sim_i$agg_loss,
+    counts = sim_i$claim_count,
+    scenario_name = scenario_assumptions$Scenario[i]
+  )
+  
+  summary_table <- rbind(summary_table, summary_i)
+}
+
+# -------------------------
+# 6. Add ratios vs baseline
+# -------------------------
+baseline_expected <- summary_table$Expected_Annual_Loss[summary_table$Scenario == "Baseline"]
+baseline_var99 <- summary_table$VaR_99[summary_table$Scenario == "Baseline"]
+baseline_var995 <- summary_table$VaR_995[summary_table$Scenario == "Baseline"]
+
+summary_table$Expected_Loss_Ratio_vs_Baseline <- summary_table$Expected_Annual_Loss / baseline_expected
+summary_table$VaR99_Ratio_vs_Baseline <- summary_table$VaR_99 / baseline_var99
+summary_table$VaR995_Ratio_vs_Baseline <- summary_table$VaR_995 / baseline_var995
+
+# -------------------------
+# 7. Main report-style table
+# -------------------------
+main_scenario_table <- data.frame(
+  Metric = c("Expected annual loss", "Variance", "Standard deviation",
+             "95% VaR", "99% VaR", "99.5% VaR",
+             "Expected loss ratio vs baseline",
+             "99% VaR ratio vs baseline",
+             "99.5% VaR ratio vs baseline"),
+  Baseline = c(
+    round(summary_table$Expected_Annual_Loss[1], 0),
+    round(summary_table$Variance[1], 0),
+    round(summary_table$Standard_Deviation[1], 0),
+    round(summary_table$VaR_95[1], 0),
+    round(summary_table$VaR_99[1], 0),
+    round(summary_table$VaR_995[1], 0),
+    round(summary_table$Expected_Loss_Ratio_vs_Baseline[1], 2),
+    round(summary_table$VaR99_Ratio_vs_Baseline[1], 2),
+    round(summary_table$VaR995_Ratio_vs_Baseline[1], 2)
+  ),
+  Moderate_Stress = c(
+    round(summary_table$Expected_Annual_Loss[2], 0),
+    round(summary_table$Variance[2], 0),
+    round(summary_table$Standard_Deviation[2], 0),
+    round(summary_table$VaR_95[2], 0),
+    round(summary_table$VaR_99[2], 0),
+    round(summary_table$VaR_995[2], 0),
+    round(summary_table$Expected_Loss_Ratio_vs_Baseline[2], 2),
+    round(summary_table$VaR99_Ratio_vs_Baseline[2], 2),
+    round(summary_table$VaR995_Ratio_vs_Baseline[2], 2)
+  ),
+  Extreme_Stress = c(
+    round(summary_table$Expected_Annual_Loss[3], 0),
+    round(summary_table$Variance[3], 0),
+    round(summary_table$Standard_Deviation[3], 0),
+    round(summary_table$VaR_95[3], 0),
+    round(summary_table$VaR_99[3], 0),
+    round(summary_table$VaR_995[3], 0),
+    round(summary_table$Expected_Loss_Ratio_vs_Baseline[3], 2),
+    round(summary_table$VaR99_Ratio_vs_Baseline[3], 2),
+    round(summary_table$VaR995_Ratio_vs_Baseline[3], 2)
+  )
+)
+
+print(main_scenario_table)
+
+# -------------------------
+# 8. Diagnostic table
+# -------------------------
+diagnostic_table <- data.frame(
+  Metric = c("Probability of zero loss", "Probability of 1 claim", "Probability of 2+ claims"),
+  Baseline = c(round(summary_table$Prob_Zero_Loss[1], 4),
+               round(summary_table$Prob_1_Claim[1], 4),
+               round(summary_table$Prob_2plus_Claims[1], 4)),
+  Moderate_Stress = c(round(summary_table$Prob_Zero_Loss[2], 4),
+                      round(summary_table$Prob_1_Claim[2], 4),
+                      round(summary_table$Prob_2plus_Claims[2], 4)),
+  Extreme_Stress = c(round(summary_table$Prob_Zero_Loss[3], 4),
+                     round(summary_table$Prob_1_Claim[3], 4),
+                     round(summary_table$Prob_2plus_Claims[3], 4))
+)
+
+print(diagnostic_table)
+
+# -------------------------
+# 9. Plots
+# -------------------------
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     main = "Business Interruption Aggregate Loss Distribution (Baseline)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightgrey",
+     border = "black")
+
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     main = "Business Interruption: Scenario Comparison",
+     xlab = "Annual Aggregate Loss",
+     col = rgb(0, 0, 1, 0.25),
+     border = "blue")
+
+hist(scenario_results[["Moderate Stress"]]$agg_loss,
+     breaks = 40, add = TRUE,
+     col = rgb(1, 0.5, 0, 0.25),
+     border = "orange")
+
+hist(scenario_results[["Extreme Stress"]]$agg_loss,
+     breaks = 40, add = TRUE,
+     col = rgb(1, 0, 0, 0.25),
+     border = "red")
+
+legend("topright",
+       legend = c("Baseline", "Moderate Stress", "Extreme Stress"),
+       fill = c(rgb(0, 0, 1, 0.25), rgb(1, 0.5, 0, 0.25), rgb(1, 0, 0, 0.25)),
+       border = c("blue", "orange", "red"),
+       bty = "n")
+```
+
+
+3b).Stress testing for extreme scenarios (e.g., 1-in-100 year events)
+
+Cargo Loss
+
+```{r}
+# =========================
+# Cargo Loss Capital Modelling
+# Q3(b) Stress testing for extreme scenarios
+# =========================
+
+rm(list = ls())
+set.seed(123)
+
+library(readxl)
+
+cargo_data_raw <- read_excel("~/OneDrive - UNSW/Actuarial Institute/ACC1/SOA_2026_Case_Study_Materials/srcsc-2026-claims-cargo.xlsx")
+
+# -------------------------
+# 1. Inputs
+# -------------------------
+n_sim <- 100000
+
+r_cargo <- 0.5370
+p_cargo <- 0.6868
+a_cargo <- 1.3832
+b_cargo <- 14.3850
+
+cargo_values <- cargo_data_raw$cargo_value
+cargo_values <- cargo_values[!is.na(cargo_values) & cargo_values > 0]
+
+# -------------------------
+# 2. Scenario assumptions
+# -------------------------
+scenario_assumptions <- data.frame(
+  Scenario = c("Baseline", "Moderate Stress", "Extreme Stress"),
+  Frequency_Multiplier = c(1.00, 1.20, 1.40),
+  Severity_Multiplier = c(1.00, 1.15, 1.30),
+  stringsAsFactors = FALSE
+)
+
+# -------------------------
+# 3. Simulation function
+# -------------------------
+simulate_compound_nbinom_beta_cargo <- function(n_sim, size, prob, freq_mult, alpha, beta, sev_mult, cargo_values) {
+  claim_count <- rnbinom(n_sim, size = size * freq_mult, prob = prob)
+  agg_loss <- numeric(n_sim)
+  
+  for (i in seq_len(n_sim)) {
+    if (claim_count[i] > 0) {
+      damage_ratio <- rbeta(claim_count[i], shape1 = alpha, shape2 = beta)
+      sampled_values <- sample(cargo_values, size = claim_count[i], replace = TRUE)
+      losses <- damage_ratio * sampled_values * sev_mult
+      agg_loss[i] <- sum(losses)
+    }
+  }
+  
+  list(agg_loss = agg_loss, claim_count = claim_count)
+}
+
+# -------------------------
+# 4. Summary function
+# -------------------------
+summarise_scenario <- function(losses, counts, scenario_name) {
+  data.frame(
+    Scenario = scenario_name,
+    Expected_Annual_Loss = mean(losses),
+    Variance = var(losses),
+    Standard_Deviation = sd(losses),
+    VaR_95 = as.numeric(quantile(losses, 0.95)),
+    VaR_99 = as.numeric(quantile(losses, 0.99)),
+    VaR_995 = as.numeric(quantile(losses, 0.995)),
+    Prob_Zero_Loss = mean(losses == 0),
+    Prob_1_Claim = mean(counts == 1),
+    Prob_2_Claims = mean(counts == 2),
+    Prob_3plus_Claims = mean(counts >= 3)
+  )
+}
+
+# -------------------------
+# 5. Run scenarios
+# -------------------------
+scenario_results <- list()
+summary_table <- data.frame()
+
+for (i in seq_len(nrow(scenario_assumptions))) {
+  sim_i <- simulate_compound_nbinom_beta_cargo(
+    n_sim = n_sim,
+    size = r_cargo,
+    prob = p_cargo,
+    freq_mult = scenario_assumptions$Frequency_Multiplier[i],
+    alpha = a_cargo,
+    beta = b_cargo,
+    sev_mult = scenario_assumptions$Severity_Multiplier[i],
+    cargo_values = cargo_values
+  )
+  
+  scenario_results[[scenario_assumptions$Scenario[i]]] <- sim_i
+  
+  summary_i <- summarise_scenario(
+    losses = sim_i$agg_loss,
+    counts = sim_i$claim_count,
+    scenario_name = scenario_assumptions$Scenario[i]
+  )
+  
+  summary_table <- rbind(summary_table, summary_i)
+}
+
+# -------------------------
+# 6. Add ratios vs baseline
+# -------------------------
+baseline_expected <- summary_table$Expected_Annual_Loss[1]
+baseline_var99 <- summary_table$VaR_99[1]
+baseline_var995 <- summary_table$VaR_995[1]
+
+summary_table$Expected_Loss_Ratio_vs_Baseline <- summary_table$Expected_Annual_Loss / baseline_expected
+summary_table$VaR99_Ratio_vs_Baseline <- summary_table$VaR_99 / baseline_var99
+summary_table$VaR995_Ratio_vs_Baseline <- summary_table$VaR_995 / baseline_var995
+
+# -------------------------
+# 7. Main table
+# -------------------------
+main_scenario_table <- data.frame(
+  Metric = c("Expected annual loss", "Variance", "Standard deviation",
+             "95% VaR", "99% VaR", "99.5% VaR",
+             "Expected loss ratio vs baseline",
+             "99% VaR ratio vs baseline",
+             "99.5% VaR ratio vs baseline"),
+  Baseline = c(round(summary_table$Expected_Annual_Loss[1], 0),
+               round(summary_table$Variance[1], 0),
+               round(summary_table$Standard_Deviation[1], 0),
+               round(summary_table$VaR_95[1], 0),
+               round(summary_table$VaR_99[1], 0),
+               round(summary_table$VaR_995[1], 0),
+               round(summary_table$Expected_Loss_Ratio_vs_Baseline[1], 2),
+               round(summary_table$VaR99_Ratio_vs_Baseline[1], 2),
+               round(summary_table$VaR995_Ratio_vs_Baseline[1], 2)),
+  Moderate_Stress = c(round(summary_table$Expected_Annual_Loss[2], 0),
+                      round(summary_table$Variance[2], 0),
+                      round(summary_table$Standard_Deviation[2], 0),
+                      round(summary_table$VaR_95[2], 0),
+                      round(summary_table$VaR_99[2], 0),
+                      round(summary_table$VaR_995[2], 0),
+                      round(summary_table$Expected_Loss_Ratio_vs_Baseline[2], 2),
+                      round(summary_table$VaR99_Ratio_vs_Baseline[2], 2),
+                      round(summary_table$VaR995_Ratio_vs_Baseline[2], 2)),
+  Extreme_Stress = c(round(summary_table$Expected_Annual_Loss[3], 0),
+                     round(summary_table$Variance[3], 0),
+                     round(summary_table$Standard_Deviation[3], 0),
+                     round(summary_table$VaR_95[3], 0),
+                     round(summary_table$VaR_99[3], 0),
+                     round(summary_table$VaR_995[3], 0),
+                     round(summary_table$Expected_Loss_Ratio_vs_Baseline[3], 2),
+                     round(summary_table$VaR99_Ratio_vs_Baseline[3], 2),
+                     round(summary_table$VaR995_Ratio_vs_Baseline[3], 2))
+)
+
+print(main_scenario_table)
+
+# -------------------------
+# 8. Plots
+# -------------------------
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     main = "Cargo Loss Aggregate Loss Distribution (Baseline)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightgrey",
+     border = "black")
+
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     main = "Cargo Loss: Scenario Comparison",
+     xlab = "Annual Aggregate Loss",
+     col = rgb(0, 0, 1, 0.25),
+     border = "blue")
+
+hist(scenario_results[["Moderate Stress"]]$agg_loss,
+     breaks = 40, add = TRUE,
+     col = rgb(1, 0.5, 0, 0.25),
+     border = "orange")
+
+hist(scenario_results[["Extreme Stress"]]$agg_loss,
+     breaks = 40, add = TRUE,
+     col = rgb(1, 0, 0, 0.25),
+     border = "red")
+
+legend("topright",
+       legend = c("Baseline", "Moderate Stress", "Extreme Stress"),
+       fill = c(rgb(0, 0, 1, 0.25), rgb(1, 0.5, 0, 0.25), rgb(1, 0, 0, 0.25)),
+       border = c("blue", "orange", "red"),
+       bty = "n")
+```
+
+
+
+```{r}
+# =========================
+# Workers' Compensation Capital Modelling
+# Q3(b) Stress testing for extreme scenarios
+# =========================
+
+rm(list = ls())
+set.seed(123)
+
+# -------------------------
+# 1. Inputs
+# -------------------------
+n_sim <- 100000
+
+lambda_wc <- 0.017665
+mu_wc <- 7.619821
+sigma2_wc <- 1.163305
+sigma_wc <- sqrt(sigma2_wc)
+
+# -------------------------
+# 2. Scenario assumptions
+# -------------------------
+scenario_assumptions <- data.frame(
+  Scenario = c("Baseline", "Moderate Stress", "Extreme Stress"),
+  Frequency_Multiplier = c(1.00, 1.20, 1.40),
+  Severity_Shift = c(0.00, 0.10, 0.20),
+  stringsAsFactors = FALSE
+)
+
+# -------------------------
+# 3. Simulation function
+# -------------------------
+simulate_compound_poisson_lognormal <- function(n_sim, lambda, freq_mult, mu, sigma, mu_shift) {
+  claim_count <- rpois(n_sim, lambda = lambda * freq_mult)
+  agg_loss <- numeric(n_sim)
+  
+  for (i in seq_len(n_sim)) {
+    if (claim_count[i] > 0) {
+      agg_loss[i] <- sum(
+        rlnorm(claim_count[i], meanlog = mu + mu_shift, sdlog = sigma)
+      )
+    }
+  }
+  
+  list(agg_loss = agg_loss, claim_count = claim_count)
+}
+
+# -------------------------
+# 4. Summary function
+# -------------------------
+summarise_scenario <- function(losses, counts, scenario_name) {
+  data.frame(
+    Scenario = scenario_name,
+    Expected_Annual_Loss = mean(losses),
+    Variance = var(losses),
+    Standard_Deviation = sd(losses),
+    VaR_95 = as.numeric(quantile(losses, 0.95)),
+    VaR_99 = as.numeric(quantile(losses, 0.99)),
+    VaR_995 = as.numeric(quantile(losses, 0.995)),
+    Prob_Zero_Loss = mean(losses == 0),
+    Prob_1_Claim = mean(counts == 1),
+    Prob_2plus_Claims = mean(counts >= 2)
+  )
+}
+
+# -------------------------
+# 5. Run scenarios
+# -------------------------
+scenario_results <- list()
+summary_table <- data.frame()
+
+for (i in seq_len(nrow(scenario_assumptions))) {
+  sim_i <- simulate_compound_poisson_lognormal(
+    n_sim = n_sim,
+    lambda = lambda_wc,
+    freq_mult = scenario_assumptions$Frequency_Multiplier[i],
+    mu = mu_wc,
+    sigma = sigma_wc,
+    mu_shift = scenario_assumptions$Severity_Shift[i]
+  )
+  
+  scenario_results[[scenario_assumptions$Scenario[i]]] <- sim_i
+  
+  summary_i <- summarise_scenario(
+    losses = sim_i$agg_loss,
+    counts = sim_i$claim_count,
+    scenario_name = scenario_assumptions$Scenario[i]
+  )
+  
+  summary_table <- rbind(summary_table, summary_i)
+}
+
+# -------------------------
+# 6. Add ratios vs baseline
+# -------------------------
+baseline_expected <- summary_table$Expected_Annual_Loss[1]
+baseline_var99 <- summary_table$VaR_99[1]
+baseline_var995 <- summary_table$VaR_995[1]
+
+summary_table$Expected_Loss_Ratio_vs_Baseline <- summary_table$Expected_Annual_Loss / baseline_expected
+summary_table$VaR99_Ratio_vs_Baseline <- summary_table$VaR_99 / baseline_var99
+summary_table$VaR995_Ratio_vs_Baseline <- summary_table$VaR_995 / baseline_var995
+
+# -------------------------
+# 7. Main table
+# -------------------------
+main_scenario_table <- data.frame(
+  Metric = c("Expected annual loss", "Variance", "Standard deviation",
+             "95% VaR", "99% VaR", "99.5% VaR",
+             "Expected loss ratio vs baseline",
+             "99% VaR ratio vs baseline",
+             "99.5% VaR ratio vs baseline"),
+  Baseline = c(round(summary_table$Expected_Annual_Loss[1], 0),
+               round(summary_table$Variance[1], 0),
+               round(summary_table$Standard_Deviation[1], 0),
+               round(summary_table$VaR_95[1], 0),
+               round(summary_table$VaR_99[1], 0),
+               round(summary_table$VaR_995[1], 0),
+               round(summary_table$Expected_Loss_Ratio_vs_Baseline[1], 2),
+               round(summary_table$VaR99_Ratio_vs_Baseline[1], 2),
+               round(summary_table$VaR995_Ratio_vs_Baseline[1], 2)),
+  Moderate_Stress = c(round(summary_table$Expected_Annual_Loss[2], 0),
+                      round(summary_table$Variance[2], 0),
+                      round(summary_table$Standard_Deviation[2], 0),
+                      round(summary_table$VaR_95[2], 0),
+                      round(summary_table$VaR_99[2], 0),
+                      round(summary_table$VaR_995[2], 0),
+                      round(summary_table$Expected_Loss_Ratio_vs_Baseline[2], 2),
+                      round(summary_table$VaR99_Ratio_vs_Baseline[2], 2),
+                      round(summary_table$VaR995_Ratio_vs_Baseline[2], 2)),
+  Extreme_Stress = c(round(summary_table$Expected_Annual_Loss[3], 0),
+                     round(summary_table$Variance[3], 0),
+                     round(summary_table$Standard_Deviation[3], 0),
+                     round(summary_table$VaR_95[3], 0),
+                     round(summary_table$VaR_99[3], 0),
+                     round(summary_table$VaR_995[3], 0),
+                     round(summary_table$Expected_Loss_Ratio_vs_Baseline[3], 2),
+                     round(summary_table$VaR99_Ratio_vs_Baseline[3], 2),
+                     round(summary_table$VaR995_Ratio_vs_Baseline[3], 2))
+)
+
+print(main_scenario_table)
+
+# -------------------------
+# 8. Plots
+# -------------------------
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     main = "Workers' Compensation Aggregate Loss Distribution (Baseline)",
+     xlab = "Annual Aggregate Loss",
+     col = "lightgrey",
+     border = "black")
+
+hist(scenario_results[["Baseline"]]$agg_loss,
+     breaks = 40,
+     main = "Workers' Compensation: Scenario Comparison",
+     xlab = "Annual Aggregate Loss",
+     col = rgb(0, 0, 1, 0.25),
+     border = "blue")
+
+hist(scenario_results[["Moderate Stress"]]$agg_loss,
+     breaks = 40, add = TRUE,
+     col = rgb(1, 0.5, 0, 0.25),
+     border = "orange")
+
+hist(scenario_results[["Extreme Stress"]]$agg_loss,
+     breaks = 40, add = TRUE,
+     col = rgb(1, 0, 0, 0.25),
+     border = "red")
+
+legend("topright",
+       legend = c("Baseline", "Moderate Stress", "Extreme Stress"),
+       fill = c(rgb(0, 0, 1, 0.25), rgb(1, 0.5, 0, 0.25), rgb(1, 0, 0, 0.25)),
+       border = c("blue", "orange", "red"),
+       bty = "n")
+```
+
+
+```{r}
+# prepare data
+library(dplyr)
+library(ggplot2)
+
+loss_data <- data.frame(
+  Loss = c(equipment_loss, cargo_loss, bi_loss, workers_loss),
+  Hazard = factor(rep(c("Equipment Failure",
+                        "Cargo Loss",
+                        "Business Interruption",
+                        "Workers Compensation"),
+                      each = n_sim))
+)
+
+
+# Professional density plot
+ggplot(loss_data, aes(x = Loss, fill = Hazard)) +
+  
+  geom_density(alpha = 0.5, color = NA) +
+  
+  facet_wrap(~Hazard, scales = "free") +
+  
+  scale_fill_manual(values = c(
+    "#2E86AB",
+    "#E67E22",
+    "#2ECC71",
+    "#8E44AD"
+  )) +
+  
+  labs(
+    title = "Simulated Aggregate Annual Loss Distributions",
+    subtitle = "Monte Carlo simulation (50,000 years)",
+    x = "Annual Aggregate Loss ($)",
+    y = "Density"
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 11),
+    strip.text = element_text(face = "bold")
+  )
+
+#Export for the report
+ggsave("aggregate_loss_distribution.png",
+       width = 8,
+       height = 5,
+       dpi = 300)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
