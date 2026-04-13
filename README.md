@@ -21,6 +21,13 @@ CQMC-specific data was also provided to gain an understanding of their exposure:
 - [CQMC Inventory](https://www.soa.org/globalassets/assets/files/research/opportunities/2026/student-research-case-study/srcsc-2026-cosmic-quarry-inventory.xlsx)
 - [CQMC Personnel](https://www.soa.org/globalassets/assets/files/research/opportunities/2026/student-research-case-study/srcsc-2026-cosmic-quarry-personnel.xlsx)
 
+Final models, analysis, and documentation can be found below:
+- [Cargo Loss](cargo-loss.ipynb)
+- [Equipment Failure](equipment-failure.ipynb)
+- [Business Interruption](business-interruption.ipynb)
+- [Workers Compensation](workers-compensation.ipynb)
+- [Capital & Risk Modelling](capital-modelling-risk.Rmd)
+
 ## External Libraries
 
 For analysis and modelling, the following libraries were used:
