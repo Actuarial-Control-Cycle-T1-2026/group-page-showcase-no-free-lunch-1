@@ -56,6 +56,7 @@ library(ggplot2)
 The raw SOA dataset provided contained records with varying data integrity issues, including values out of range of the dictionary definition, inconsistent data classes, and wrongly formatted data. Due to a lack of context with regards to the data collection process, we standardised our data cleaning approach to omit any badly formatted or incorrect (per data dictionary) entries instead of attempting to amend.
 
 For example, these rules were constructed for the cargo loss dataset:
+
 | Issue | Action |
 | --- | --- |
 | Corrupted categoricals | Remove |
@@ -355,6 +356,7 @@ Common external shocks such as solar storms introduce positive dependence betwee
 Risks for each product lines were evaluated and mitigation strategies were provided.
 
 ##### Cargo Loss
+
 | Threats | Likelihood | Severity | Rating | Mitigation |
 | --- | --- | --- | --- | --- |
 | Solar storm/flare      | Moderate | Very High | Critical | Exclusion clause: Solar exclusion is predicted but undisclosed |
@@ -366,6 +368,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 | Willful misconduct     | Low | Variable | Low-Med | Exclusion clause; identified via investigation |
 
 ##### Equipment Failure
+
 | Threats | Likelihood | Severity | Rating | Mitigation |
 | --- | --- | --- | --- | --- |
 | Mechanical component failure             | Moderate | High      | High | Preventative maintenance requirements |
@@ -376,6 +379,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 | Poor maintenance practices               | Moderate | Moderate  | Medium | Maintenance documentation and compliance requirements |
 
 ##### Workers' Compensation
+
 | Threats | Likelihood | Severity | Rating | Mitigation |
 | --- | --- | --- | --- | --- |
 | On-site injury (slips, trips, falls)     | Moderate | High      | High | Safety training, protective gear, and workplace inspections |
@@ -386,6 +390,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 | Wilful misconduct                        | Low      | Variable  | Low-Med | Policy exclusions and investigation procedures |
 
 ##### Business Interruption
+
 | Threats | Likelihood | Severity | Rating | Mitigation |
 |:---| --- | --- | --- | --- |
 | Major equipment malfunction                 | Moderate | High      | High | Preventative maintenance programs, equipment redundancy, and predictive monitoring systems |
