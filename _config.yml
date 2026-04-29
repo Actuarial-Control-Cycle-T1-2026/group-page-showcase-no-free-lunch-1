@@ -1,1 +1,6 @@
 theme: jekyll-theme-cayman
+title: "No Free Lunch - Actuarial Control Cycle"
+description: "GGIC Insurance Proposal for Cosmic Quarry Mining Corporation"
+markdown: kramdown
+kramdown:
+  input: GFM
