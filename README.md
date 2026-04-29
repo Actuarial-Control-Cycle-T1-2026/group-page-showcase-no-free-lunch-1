@@ -57,7 +57,7 @@ The raw SOA dataset provided contained records with varying data integrity issue
 
 For example, these rules were constructed for the cargo loss dataset:
 | Issue | Action |
-|---|---|
+|:---:|:---:|
 | Corrupted categoricals | Remove |
 | Out-of-range physical values | Remove |
 | `route_risk` outside integer [1,5] | Remove |
@@ -356,7 +356,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 
 ##### Cargo Loss
 | Threats | Likelihood | Severity | Rating | Mitigation |
-|---|---|---|---|---|
+|:---:|:---:|:---:|:---:|:---:|
 | Solar storm/flare      | Moderate | Very High | Critical | Exclusion clause: Solar exclusion is predicted but undisclosed |
 | Debris field collision | Mod-High | High | High | Route declaration; density rating |
 | Total vessel loss      | Low | Catastrophic | High | Tier 1 deductible; Stop-loss reinsurance  |
@@ -367,7 +367,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 
 ##### Equipment Failure
 | Threats | Likelihood | Severity | Rating | Mitigation |
-|---|:---|:---|:---|:---|
+|:---:|:---:|:---:|:---:|:---:|
 | Mechanical component failure             | Moderate | High      | High | Preventative maintenance requirements |
 | Control system / AI malfunction          | Low-Mod  | Very High | High | Diagnostic monitoring and system redundancy |
 | Radiation damage to electronics          | Moderate | High      | High | Radiation shielding and solar system risk rating |
@@ -377,7 +377,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 
 ##### Workers' Compensation
 | Threats | Likelihood | Severity | Rating | Mitigation |
-|---|:---|:---|:---|:---|
+|:---:|:---:|:---:|:---:|:---:|
 | On-site injury (slips, trips, falls)     | Moderate | High      | High | Safety training, protective gear, and workplace inspections |
 | Exposure to hazardous materials          | Low-Mod  | High      | High | Personal protective equipment and monitoring protocols |
 | Fatigue-related accidents                | Moderate | Moderate      | Medium | Shift scheduling, rest periods, and workload monitoring |
@@ -387,7 +387,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 
 ##### Business Interruption
 | Threats | Likelihood | Severity | Rating | Mitigation |
-|---|:---|:---|:---|:---|
+|:---|:---:|:---:|:---:|:---:|
 | Major equipment malfunction                 | Moderate | High      | High | Preventative maintenance programs, equipment redundancy, and predictive monitoring systems |
 | Solar storm / extreme environmental event   | Low-Mod  | Very High | High | Hardened infrastructure, radiation shielding, and early warning space weather systems |
 | Energy system failure                       | Moderate | High      | Medium-High | Backup power systems, redundant energy grids, and energy storage capacity |
