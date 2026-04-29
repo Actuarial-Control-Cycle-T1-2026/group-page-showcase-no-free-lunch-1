@@ -356,7 +356,7 @@ Risks for each product lines were evaluated and mitigation strategies were provi
 
 ##### Cargo Loss
 | Threats | Likelihood | Severity | Rating | Mitigation |
-|---|:---|:---|:---|:---|
+|---|---|---|---|---|
 | Solar storm/flare      | Moderate | Very High | Critical | Exclusion clause: Solar exclusion is predicted but undisclosed |
 | Debris field collision | Mod-High | High | High | Route declaration; density rating |
 | Total vessel loss      | Low | Catastrophic | High | Tier 1 deductible; Stop-loss reinsurance  |
