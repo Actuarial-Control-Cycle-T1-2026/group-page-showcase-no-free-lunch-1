@@ -4,4 +4,4 @@ description: "GGIC Insurance Proposal for Cosmic Quarry Mining Corporation"
 markdown: kramdown
 kramdown:
   input: GFM
-  smart_quotes: disabled
+  smart_quotes: ["apos", "apos", "quot", "quot"]
